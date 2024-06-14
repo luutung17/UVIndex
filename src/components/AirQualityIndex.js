@@ -21,9 +21,9 @@ const AQILevel = styled.div`
 `;
 
 const Warning = styled.div`
-  color: red;
   font-weight: bold;
   margin-top: 10px;
+  color: ${props => props.color};
 `;
 
 const Title = styled.h2`
@@ -39,7 +39,7 @@ const AirQualityIndex = ({ city }) => {
 
   useEffect(() => {
     const fetchAQI = async () => {
-      const apiKey = '1779ca818b59557aa48558aec376d6db';
+      const apiKey = '1779ca818b59557aa48558aec376d6db'; // Thay bằng API key của bạn
 
       // Đặt lại trạng thái trước khi bắt đầu tìm kiếm mới
       setLoading(true);
@@ -52,47 +52,84 @@ const AirQualityIndex = ({ city }) => {
 
         // Lấy chỉ số AQI từ tọa độ địa lý
         const aqiResponse = await axios.get(`http://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${apiKey}`);
-        setAqi(aqiResponse.data.list[0].main.aqi);
+        const { aqi } = aqiResponse.data.list[0].main;
+        setAqi(aqi);
       } catch (error) {
-        setError('Lỗi khi lấy dữ liệu: ' + error.message);
-        console.error('Lỗi khi lấy dữ liệu:', error.response ? error.response.data : error.message);
-      } finally {
-        setLoading(false);
+        setError('Không thể lấy thông tin chất lượng không khí.');
       }
+
+      setLoading(false);
     };
 
     fetchAQI();
   }, [city]);
 
-  const getAQIColor = (index) => {
-    if (index === 1) return 'green';
-    if (index === 2) return 'yellow';
-    if (index === 3) return 'orange';
-    if (index === 4) return 'red';
-    return 'purple';
+  const getAQIColor = (aqi) => {
+    switch (aqi) {
+      case 1:
+        return 'green';
+      case 2:
+        return 'pink';
+      case 3:
+        return 'orange';
+      case 4:
+        return 'red';
+      case 5:
+        return 'purple';
+      default:
+        return 'gray';
+    }
   };
 
-  const getAQIDescription = (index) => {
-    if (index === 1) return 'Good';
-    if (index === 2) return 'Fair';
-    if (index === 3) return 'Moderate';
-    if (index === 4) return 'Poor';
-    return 'Very Poor';
+  const getWarningMessage = (aqi) => {
+    switch (aqi) {
+      case 1:
+        return 'Chất lượng không khí tốt. Không cần lo lắng.';
+      case 2:
+        return 'Chất lượng không khí trung bình. Người nhạy cảm nên hạn chế ra ngoài.';
+      case 3:
+        return 'Chất lượng không khí kém. Hạn chế ra ngoài, đặc biệt là người nhạy cảm.';
+      case 4:
+        return 'Chất lượng không khí xấu. Tránh ra ngoài nếu có thể.';
+      case 5:
+        return 'Chất lượng không khí nguy hiểm. Tránh ra ngoài và bảo vệ sức khỏe của bạn.';
+      default:
+        return '';
+    }
   };
 
-  if (loading) {
-    return <Container>Đang tải dữ liệu...</Container>;
-  }
-
-  if (error) {
-    return <Container>{error}</Container>;
-  }
+  const getWarningColor = (aqi) => {
+    switch (aqi) {
+      case 1:
+        return 'green';
+      case 2:
+        return 'pink';
+      case 3:
+        return 'orange';
+      case 4:
+        return 'red';
+      case 5:
+        return 'purple';
+      default:
+        return 'gray';
+    }
+  };
 
   return (
     <Container>
-      <Title>Chỉ số Chất lượng Không khí tại {city}</Title>
-      <AQILevel color={getAQIColor(aqi)}>{aqi}</AQILevel>
-      <Warning>{getAQIDescription(aqi)}</Warning>
+      <Title>Chỉ số Chất lượng Không khí</Title>
+      {loading ? (
+        <p>Đang tải...</p>
+      ) : error ? (
+        <p>{error}</p>
+      ) : (
+        <>
+          <AQILevel color={getAQIColor(aqi)}>{aqi}</AQILevel>
+          {getWarningMessage(aqi) && (
+            <Warning color={getWarningColor(aqi)}>{getWarningMessage(aqi)}</Warning>
+          )}
+        </>
+      )}
     </Container>
   );
 };
