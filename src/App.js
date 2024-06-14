@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import UVIndex from './components/UVIndex';
+import AirQualityIndex from './components/AirQualityIndex';
 import styled from 'styled-components';
 
 const AppContainer = styled.div`
@@ -60,7 +61,7 @@ const Button = styled.button`
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  
+
   &:hover {
     background-color: #0056b3;
   }
@@ -69,6 +70,7 @@ const Button = styled.button`
 const App = () => {
   const [city, setCity] = useState('Hanoi');
   const [inputCity, setInputCity] = useState('Hanoi');
+  const [showUVIndex, setShowUVIndex] = useState(true);
 
   const handleCityChange = (event) => {
     setInputCity(event.target.value);
@@ -76,6 +78,10 @@ const App = () => {
 
   const handleSearch = () => {
     setCity(inputCity);
+  };
+
+  const toggleView = () => {
+    setShowUVIndex(!showUVIndex);
   };
 
   return (
@@ -107,7 +113,10 @@ const App = () => {
         />
         <Button onClick={handleSearch}>Tìm kiếm</Button>
       </InputSection>
-      <UVIndex city={city} />
+      <Button onClick={toggleView}>
+        {showUVIndex ? 'Xem Chỉ số Chất lượng Không khí' : 'Xem Chỉ số UV'}
+      </Button>
+      {showUVIndex ? <UVIndex city={city} /> : <AirQualityIndex city={city} />}
     </AppContainer>
   );
 };
